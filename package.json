@@ -1,0 +1,20 @@
+{
+  "name": "local-ai-productivity",
+  "version": "0.1.0",
+  "description": "Local-first AI productivity MVP",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "vite",
+    "build": "echo \"Build step to be added\"",
+    "test": "node src/groq/adapter.test.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^42.2.0",
+    "node-fetch": "^2.7.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  }
+}

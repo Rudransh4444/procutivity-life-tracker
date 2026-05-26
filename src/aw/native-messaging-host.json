@@ -1,0 +1,7 @@
+{
+  "name": "com.localai.productivity.native",
+  "description": "Local AI Productivity native messaging host",
+  "path": "C:\\Users\\deepa\\local-ai-productivity\\bin\\native-host.exe",
+  "type": "stdio",
+  "allowed_extensions": ["localai_productivity_extension@local"]
+}
