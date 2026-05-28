@@ -33,6 +33,17 @@
         }
       });
     </script>
+    <script>
+      // Provide a safe global stats variable to prevent ReferenceError from older bundles
+      try {
+        if (typeof stats === 'undefined') {
+          // eslint-disable-next-line no-var
+          var stats = null;
+        }
+      } catch (e) {
+        // ignore
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
