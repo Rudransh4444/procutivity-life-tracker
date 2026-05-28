@@ -5,6 +5,10 @@ import AnalyticsDashboard from './AnalyticsDashboard.jsx';
 import MorningRoutineModal from './MorningRoutineModal.jsx';
 import EveningRoutineModal from './EveningRoutineModal.jsx';
 import SettingsModal from './SettingsModal.jsx';
+import GoalsPage from './GoalsPage.jsx';
+import FitnessPage from './FitnessPage.jsx';
+import JournalPage from './JournalPage.jsx';
+import StatsPage from './StatsPage.jsx';
 import {
   LS,
   loadJSON,
@@ -23,6 +27,7 @@ import {
 } from './dataModel.js';
 import { addWorkout as addWorkoutEntry } from './dataModelAsync.js';
 import { FiSettings } from 'react-icons/fi';
+
 
 const defaultAiConfig = {
   apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
@@ -123,6 +128,7 @@ export function App() {
   const [showChrome, setShowChrome] = useState(false);
   const [showWidgets, setShowWidgets] = useState(false);
   const [statsState, setStatsState] = useState({ daily: null, weekly: null, monthly: null, trend: [] });
+  const [activeTab, setActiveTab] = useState('General');
 
   useEffect(() => {
     const syncTimeOfDay = () => setTimeOfDay(getTimeOfDay());
@@ -353,30 +359,50 @@ export function App() {
 
       <div className="shell-toolbar">
         <div className="scene-chip">{sceneLabel}</div>
+        <div className="tab-strip">
+          {['General','Goals','Stats','Fitness','Journal'].map(t => (
+            <button key={t} className={`button button-sm ${activeTab===t? 'button-primary' : 'button-secondary'}`} style={{ marginRight:6 }} onClick={()=>setActiveTab(t)}>{t}</button>
+          ))}
+        </div>
+        <div style={{flex:1}} />
         <button className="button button-secondary button-sm" onClick={() => setShowSettings(true)} title="Settings">
           <FiSettings size={18} />
         </button>
       </div>
 
       <div className={`widgets-stage ${showWidgets ? 'widgets-stage--visible' : ''}`}>
-        <AnalyticsDashboard
-          tasks={tasks}
-          projects={projects}
-          moodTrend={moodTrend}
-          productivityMetrics={productivityMetrics}
-          awData={awData}
-          todayMood={todayMood}
-          sceneLabel={sceneLabel}
-          stats={statsState}
-          onAddTask={() => {
-            const title = prompt('Task title:');
-            if (title) handleAddTask(title);
-          }}
-          onAddWorkout={handleAddWorkout}
-          onCheckInMorning={() => setShowMorningRoutine(true)}
-          onCompleteTask={handleCompleteTask}
-          onSelectTask={() => {}}
-        />
+        {activeTab === 'General' && (
+          <AnalyticsDashboard
+            tasks={tasks}
+            projects={projects}
+            moodTrend={moodTrend}
+            productivityMetrics={productivityMetrics}
+            awData={awData}
+            todayMood={todayMood}
+            sceneLabel={sceneLabel}
+            stats={statsState}
+            onAddTask={() => {
+              const title = prompt('Task title:');
+              if (title) handleAddTask(title);
+            }}
+            onAddWorkout={handleAddWorkout}
+            onCheckInMorning={() => setShowMorningRoutine(true)}
+            onCompleteTask={handleCompleteTask}
+            onSelectTask={() => {}}
+          />
+        )}
+        {activeTab === 'Goals' && (
+          <GoalsPage projects={projects} onAddProject={handleAddProject} />
+        )}
+        {activeTab === 'Stats' && (
+          <StatsPage stats={statsState} />
+        )}
+        {activeTab === 'Fitness' && (
+          <FitnessPage onAddWorkout={handleAddWorkout} />
+        )}
+        {activeTab === 'Journal' && (
+          <JournalPage />
+        )}
 
         <div className="debug-panel">
           <details>
