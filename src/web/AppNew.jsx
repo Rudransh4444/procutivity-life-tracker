@@ -21,6 +21,7 @@ import {
   shouldShowEveningRoutine,
   markEveningRoutineComplete
 } from './dataModel.js';
+import { addWorkout as addWorkoutEntry } from './dataModelAsync.js';
 import { FiSettings } from 'react-icons/fi';
 
 const defaultAiConfig = {
@@ -187,7 +188,8 @@ export function App() {
           const monthly = await stats.getMonthlyStats(new Date());
           const trend = await stats.getTrend('productivity', 14);
           const daily = await stats.getDailyStats(new Date());
-          setStatsState({ daily, weekly, monthly, trend });
+          const workout = await stats.getWorkoutSummary('weekly');
+          setStatsState({ daily, weekly, monthly, trend, workout });
         } catch (es) {
           console.warn('stats load error', es);
         }
@@ -249,6 +251,34 @@ export function App() {
 
   const handleAddNewTasks = (newTasks) => {
     handleAddTasks(newTasks);
+  };
+
+  const handleAddWorkout = async () => {
+    try {
+      const exercise = prompt('Exercise name (e.g., Squat):');
+      if (!exercise) return null;
+      const repsStr = prompt('Reps per set (e.g., 5):', '5');
+      const weightStr = prompt('Weight (kg) per set (e.g., 80):', '0');
+      const setsStr = prompt('Number of sets (e.g., 3):', '3');
+      const reps = Number(repsStr) || 0;
+      const weight = Number(weightStr) || 0;
+      const sets = Math.max(1, Number(setsStr) || 1);
+      const setsArr = [];
+      for (let i=0;i<sets;i++) setsArr.push({ reps, weight });
+      const w = await addWorkoutEntry({ exercise, sets: setsArr, date: new Date().toISOString() });
+      // reload stats
+      try {
+        const { default: stats } = await import('./stats.js');
+        const workout = await stats.getWorkoutSummary('weekly');
+        setStatsState(s => ({ ...s, workout }));
+      } catch (es) {
+        console.warn('stats refresh after workout failed', es);
+      }
+      return w;
+    } catch (e) {
+      console.warn('add workout failed', e);
+      return null;
+    }
   };
 
   const handleSaveConfig = (newConfig) => {
@@ -342,6 +372,7 @@ export function App() {
             const title = prompt('Task title:');
             if (title) handleAddTask(title);
           }}
+          onAddWorkout={handleAddWorkout}
           onCheckInMorning={() => setShowMorningRoutine(true)}
           onCompleteTask={handleCompleteTask}
           onSelectTask={() => {}}

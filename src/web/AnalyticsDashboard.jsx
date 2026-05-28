@@ -252,6 +252,23 @@ export function AnalyticsDashboard({
         </div>
       )}
 
+      {/* Fitness Summary */}
+      {stats && stats.workout && (
+        <div className="card fitness-card">
+          <h3>Fitness (This week)</h3>
+          <div className="fitness-grid">
+            <div className="fitness-item">
+              <div className="fitness-num">{stats.workout.totalSessions}</div>
+              <div className="fitness-label">Sessions</div>
+            </div>
+            <div className="fitness-item">
+              <div className="fitness-num">{Math.round(stats.workout.totalVolume)}</div>
+              <div className="fitness-label">Volume</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Today's Tasks */}
       <div className="card tasks-card">
         <div className="tasks-header">
@@ -302,6 +319,9 @@ export function AnalyticsDashboard({
         </button>
         <button className="button button-secondary" onClick={onAddTask}>
           <FiPlus size={16} /> New Task
+        </button>
+        <button className="button button-secondary" onClick={onAddWorkout}>
+          <FiPlus size={16} /> Log Workout
         </button>
       </div>
     </div>
