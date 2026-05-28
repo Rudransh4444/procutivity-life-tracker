@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { loadJSON } from './storage.js';
 import { LS } from './dataModel.js';
-import { calculateGoalProgress, getTasks, updateTask } from './dataModelAsync.js';
+import { calculateGoalProgress, getTasks, updateTask, addTask } from './dataModelAsync.js';
 
 export default function GoalsPage({ projects = [], onAddProject, onUpdateProject }) {
   const [localProjects, setLocalProjects] = useState(projects || []);
@@ -58,6 +58,24 @@ export default function GoalsPage({ projects = [], onAddProject, onUpdateProject
     await onUpdateProject?.(proj);
     setMilestoneInputs(prev => ({ ...prev, [projectId]: '' }));
     setLocalProjects(updated);
+  }
+
+  // Quick-create a task linked to this goal
+  async function quickCreateTask(projectId) {
+    const key = `quick-${projectId}`;
+    const title = (milestoneInputs[key] || '').trim();
+    if (!title) return;
+    try {
+      const t = await addTask({ title, goalId: projectId, date: new Date().toISOString().split('T')[0], status: 'todo', weight: 1 });
+      const tasks = await getTasks();
+      setAllTasks(tasks || []);
+      // refresh progress
+      const { progress } = await calculateGoalProgress(projectId);
+      setProgressMap(prev => ({ ...prev, [projectId]: progress }));
+      setMilestoneInputs(prev => ({ ...prev, [key]: '' }));
+    } catch (e) {
+      console.error('quickCreateTask failed', e);
+    }
   }
 
   function setMilestoneInput(projectId, val) {
@@ -161,6 +179,11 @@ export default function GoalsPage({ projects = [], onAddProject, onUpdateProject
                       ))}
                     </select>
                     <button className="button button-sm button-primary" onClick={() => { if (linkSelection[p.id]) linkTask(p.id, linkSelection[p.id]); }} style={{ marginLeft: 8 }}>Link</button>
+                  </div>
+
+                  <div style={{ display: 'flex', marginTop: 8 }}>
+                    <input placeholder="Quick create task for this goal" value={milestoneInputs[`quick-${p.id}`] || ''} onChange={e => setMilestoneInput(`quick-${p.id}`, e.target.value)} style={{ flex: 1, padding: 6 }} />
+                    <button className="button button-sm button-primary" onClick={() => quickCreateTask(p.id)} style={{ marginLeft: 8 }}>Create Task</button>
                   </div>
 
                 </div>
