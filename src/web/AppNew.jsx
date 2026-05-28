@@ -391,6 +391,17 @@ export function App() {
               {'\n'}Morning routine show: {shouldShowMorningRoutine()}
               {'\n'}Evening routine show: {shouldShowEveningRoutine()}
             </pre>
+            <div style={{ marginTop: 8 }}>
+              <button className="button button-secondary button-sm" onClick={() => {
+                try {
+                  const { exportDailyJournal } = require('./obsidian-export.js');
+                  exportDailyJournal(new Date().toISOString().split('T')[0]);
+                } catch (e) {
+                  // fallback dynamic import for browser
+                  import('./obsidian-export.js').then(m => m.exportDailyJournal(new Date().toISOString().split('T')[0]));
+                }
+              }}>Export today's journal (Obsidian)</button>
+            </div>
           </details>
         </div>
       </div>
