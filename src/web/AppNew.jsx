@@ -128,7 +128,7 @@ export function App() {
   const [showChrome, setShowChrome] = useState(false);
   const [showWidgets, setShowWidgets] = useState(false);
   const [statsState, setStatsState] = useState({ daily: null, weekly: null, monthly: null, trend: [] });
-  const [activeTab, setActiveTab] = useState('General');
+  const [activeTab, setActiveTab] = usePersistedState(LS.uiActiveTab, 'General');
 
   useEffect(() => {
     const syncTimeOfDay = () => setTimeOfDay(getTimeOfDay());

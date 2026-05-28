@@ -12,7 +12,8 @@ const LS = {
   awConfig: 'lap.aw_config',
   dailyRoutineConfig: 'lap.daily_routine_config',
   madeTimeLastMorningCheck: 'lap.made_time_last_morning_check',
-  madeTimeLastEveningCheck: 'lap.made_time_last_evening_check'
+  madeTimeLastEveningCheck: 'lap.made_time_last_evening_check',
+  uiActiveTab: 'lap.ui.active_tab'
 };
 
 export { LS };
