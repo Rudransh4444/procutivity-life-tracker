@@ -1,0 +1,39 @@
+[
+  {
+    "id": "8fc6ee34-7f9d-4970-9090-c4c9cb64d007",
+    "date": "2026-05-26T10:20:22.727Z",
+    "next_best_action_id": "t1",
+    "plan_items": [
+      {
+        "id": "plan_1",
+        "task_id": "t1",
+        "action_text": "Write project README",
+        "scheduled_time": null
+      },
+      {
+        "id": "plan_2",
+        "task_id": "t2",
+        "action_text": "Implement task CRUD API",
+        "scheduled_time": null
+      },
+      {
+        "id": "plan_3",
+        "task_id": "t3",
+        "action_text": "Prepare sprint plan",
+        "scheduled_time": null
+      },
+      {
+        "id": "plan_4",
+        "task_id": "t4",
+        "action_text": "Quick bug triage",
+        "scheduled_time": null
+      },
+      {
+        "id": "plan_5",
+        "task_id": "t5",
+        "action_text": "Refactor NBAT scoring",
+        "scheduled_time": null
+      }
+    ]
+  }
+]

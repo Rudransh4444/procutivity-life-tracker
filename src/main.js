@@ -3,11 +3,13 @@ const path = require('path');
 let init;
 let fetchByGROQ;
 let nbat;
+let useMock = false;
 try {
   init = require('./db/init').init;
 } catch (e) {
   console.warn('DB init not available:', e.message);
   init = (dbPath) => ({ close: () => {} });
+  useMock = true;
 }
 try {
   fetchByGROQ = require('./groq/adapter').fetchByGROQ;
@@ -21,6 +23,66 @@ try {
   console.warn('NBAT engine not available:', e.message);
   nbat = { selectNextBest: () => null };
 }
+
+// If DB missing, use mock sample tasks for demo
+if (useMock) {
+  const sample = require('./mock/sample_tasks');
+  fetchByGROQ = async () => sample.tasks;
+}
+
+let ai;
+try {
+  ai = require('./ai/index');
+} catch (e) {
+  console.warn('AI adapter not available:', e.message);
+  ai = { aiGenerate: async (prompt, options) => ({ text: 'AI adapter not available (stub).', metadata: {} }) };
+}
+
+ipcMain.handle('ai-chat', async (event, prompt, options) => {
+  try {
+    const res = await ai.aiGenerate(prompt || '', options || {});
+    return res;
+  } catch (err) {
+    return { error: err.message };
+  }
+});
+
+ipcMain.handle('plan-day', async (event, dateISO) => {
+  try {
+    const planner = require('./ai/planner');
+    const dbPath = path.join(app.getPath('userData'), 'data.sqlite');
+    // load AI config from settings
+    let aiCfg = {};
+    try { aiCfg = require('./settings/ai').getConfig() } catch (e) { aiCfg = {}; }
+    const res = await planner.planDay(dbPath, dateISO, { remote: aiCfg });
+    return res;
+  } catch (err) {
+    return { error: err.message };
+  }
+});
+
+ipcMain.handle('list-dayplans', async () => {
+  try {
+    const { listDayPlans } = require('./db/dayplan_store');
+    const dbPath = path.join(app.getPath('userData'), 'data.sqlite');
+    const plans = listDayPlans(dbPath);
+    return { plans };
+  } catch (e) { return { error: e.message }; }
+});
+
+ipcMain.handle('get-ai-config', async () => {
+  try {
+    const cfg = require('./settings/ai').getConfig();
+    return { cfg };
+  } catch (e) { return { error: e.message }; }
+});
+
+ipcMain.handle('set-ai-config', async (event, cfg) => {
+  try {
+    const ok = require('./settings/ai').setConfig(cfg || {});
+    return { ok };
+  } catch (e) { return { error: e.message }; }
+});
 
 function createWindow() {
   const win = new BrowserWindow({
