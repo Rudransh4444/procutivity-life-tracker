@@ -1,6 +1,7 @@
 // aiAdapter.js — lightweight on-demand AI adapter that respects caching and minimal payload rules
 import insightsCache from './insightsCache.js';
 import { loadJSON } from './storage.js';
+import { LS } from './dataModel.js';
 
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -11,8 +12,9 @@ function hashInput(str) {
 
 export async function requestInsight(prompt, options = {}) {
   // options: model, ttl
-  const settings = await loadJSON('settings', {});
-  const apiKey = settings.groqApiKey || process.env.GROQ_API_KEY;
+  // Prefer lap.ai_config (LS.aiConfig), fall back to legacy 'settings' key and env
+  const aiConfig = loadJSON(LS.aiConfig, null) || await loadJSON('settings', {});
+  const apiKey = (aiConfig && (aiConfig.apiKey || aiConfig.groqApiKey)) || process.env.GROQ_API_KEY;
   const payload = JSON.stringify({ prompt, options: { model: options.model || 'llama-3.1-8b-instant' } });
   const h = hashInput(payload);
   const cached = await insightsCache.getCached(h);
