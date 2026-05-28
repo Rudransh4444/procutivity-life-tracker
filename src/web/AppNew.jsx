@@ -249,10 +249,24 @@ export function App() {
       name,
       goal,
       completed: false,
+      milestones: [],
       createdAt: new Date().toISOString()
     };
-    setProjects([...projects, newProject]);
+    const arr = [...projects, newProject];
+    setProjects(arr);
+    saveJSON(LS.projects, arr);
     return newProject;
+  };
+
+  const handleUpsertProject = async (proj) => {
+    // update or insert project in state and persist
+    const idx = projects.findIndex(p => p.id === proj.id);
+    let arr;
+    if (idx === -1) arr = [proj, ...projects];
+    else { arr = [...projects]; arr[idx] = { ...arr[idx], ...proj }; }
+    setProjects(arr);
+    saveJSON(LS.projects, arr);
+    return proj;
   };
 
   const handleAddNewTasks = (newTasks) => {
@@ -392,7 +406,7 @@ export function App() {
           />
         )}
         {activeTab === 'Goals' && (
-          <GoalsPage projects={projects} onAddProject={handleAddProject} />
+          <GoalsPage projects={projects} onAddProject={handleAddProject} onUpdateProject={handleUpsertProject} />
         )}
         {activeTab === 'Stats' && (
           <StatsPage stats={statsState} />
