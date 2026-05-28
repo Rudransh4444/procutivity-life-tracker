@@ -18,3 +18,4 @@ Notes:
 - After deployment, open the site and verify migration ran (check Console logs). If you need, provide repo access for me to push the branch and open a PR.
 
 Redeploy trigger requested: 2026-05-28T18:20:00+05:30
+Last deploy: 2026-05-28T18:37:56
