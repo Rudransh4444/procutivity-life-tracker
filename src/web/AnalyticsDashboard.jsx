@@ -17,9 +17,11 @@ export function AnalyticsDashboard({
   awData = [],
   todayMood = null,
   onAddTask,
+  onAddWorkout,
   onCheckInMorning,
   onCompleteTask,
-  onSelectTask
+  onSelectTask,
+  stats = null
 }) {
   const today = new Date().toISOString().split('T')[0];
 
