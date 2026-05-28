@@ -6,6 +6,7 @@ import { FiSettings, FiX, FiSave } from 'react-icons/fi';
  */
 export function SettingsModal({ isOpen, onClose, aiConfig, onSaveConfig }) {
   const [apiKey, setApiKey] = useState(aiConfig.apiKey || '');
+  const [openaiKey, setOpenaiKey] = useState(aiConfig.openaiApiKey || '');
   const [awHost, setAwHost] = useState(aiConfig.awHost || 'http://localhost:5600');
   const [saved, setSaved] = useState(false);
 
@@ -13,6 +14,7 @@ export function SettingsModal({ isOpen, onClose, aiConfig, onSaveConfig }) {
     onSaveConfig({
       ...aiConfig,
       apiKey,
+      openaiApiKey: openaiKey,
       awHost
     });
     setSaved(true);
@@ -44,6 +46,23 @@ export function SettingsModal({ isOpen, onClose, aiConfig, onSaveConfig }) {
             placeholder="gsk_..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
+            className="settings-input"
+          />
+          <p className="text-muted text-xs mt-sm">
+            ⚠️ Keep your API key secret. It's stored locally in your browser only.
+          </p>
+        </div>
+
+        <div className="settings-section">
+          <h3>OpenAI API Key (optional)</h3>
+          <p className="text-secondary text-sm">
+            Use this if you want to call OpenAI directly instead of a Groq-compatible endpoint.
+          </p>
+          <input
+            type="password"
+            placeholder="sk-..."
+            value={openaiKey}
+            onChange={(e) => setOpenaiKey(e.target.value)}
             className="settings-input"
           />
           <p className="text-muted text-xs mt-sm">
