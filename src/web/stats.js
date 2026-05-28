@@ -39,11 +39,28 @@ export async function getDailyStats(date) {
 }
 
 async function computeFocusMinutesForDay(day) {
-  // Try to use ActivityWatch data if present
-  const aw = await loadJSON('aw_events', []);
-  if (Array.isArray(aw) && aw.length) {
-    // entries assumed to have date and duration_minutes
-    return aw.filter(e=> (e.date||'').startsWith(day)).reduce((s,e)=>s + (Number(e.duration_minutes)||Number(e.duration)||0),0);
+  // Prefer progressEvents stored by activitywatch.js
+  const pe = await loadJSON('progressEvents', []);
+  if (Array.isArray(pe) && pe.length) {
+    // classify domains into productive vs distraction using simple lists
+    const productive = ['github.com', 'gitlab.com', 'stackoverflow.com', 'docs.google.com', 'figma.com', 'notion.so'];
+    const distraction = ['youtube.com', 'x.com', 'reddit.com', 'instagram.com', 'facebook.com', 'tiktok.com'];
+    // sum productive minutes for the day
+    let focus = 0;
+    for (const e of pe) {
+      const ts = (e.timestamp || '').split('T')[0];
+      if (ts !== day) continue;
+      const domain = String(e.app || e.title || e.meta?.domain || '').toLowerCase();
+      const minutes = Number(e.duration_minutes || e.duration || 0) || 0;
+      if (productive.some(p => domain.includes(p))) focus += minutes;
+      else if (distraction.some(d => domain.includes(d))) {
+        // ignore
+      } else {
+        // neutral — count half as focus
+        focus += Math.round(minutes * 0.5);
+      }
+    }
+    return focus;
   }
   // fallback: estimate from tasks' estimatedMinutes
   const tasks = await loadJSON('tasks', []);
@@ -122,4 +139,30 @@ function calculateLocalProductivityFromDaily(s) {
   return Math.min(100, Math.max(0, Math.round(raw)));
 }
 
-export default { getDailyStats, getWeeklyStats, getMonthlyStats, getTrend };
+export async function getWorkoutSummary(period='weekly') {
+  const workouts = await loadJSON('workouts', []);
+  if (!Array.isArray(workouts) || workouts.length === 0) return { totalSessions: 0, totalVolume: 0, byExercise: {} };
+  const now = new Date();
+  let since = new Date();
+  if (period === 'weekly') since.setDate(now.getDate()-7);
+  else if (period === 'monthly') since.setMonth(now.getMonth()-1);
+  else since = new Date(0);
+
+  const filtered = workouts.filter(w => new Date(w.date) >= since);
+  const byExercise = {};
+  let totalVolume = 0;
+  for (const w of filtered) {
+    const sets = Array.isArray(w.sets) ? w.sets : [w.sets];
+    for (const s of sets) {
+      const reps = Number(s.reps || 0);
+      const weight = Number(s.weight || 0);
+      const vol = reps * weight;
+      totalVolume += vol;
+      const ex = w.exercise || 'unknown';
+      byExercise[ex] = (byExercise[ex] || 0) + vol;
+    }
+  }
+  return { totalSessions: filtered.length, totalVolume, byExercise };
+}
+
+export default { getDailyStats, getWeeklyStats, getMonthlyStats, getTrend, getWorkoutSummary };
