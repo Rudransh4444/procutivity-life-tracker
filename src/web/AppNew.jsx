@@ -402,6 +402,53 @@ export function App() {
                 }
               }}>Export today's journal (Obsidian)</button>
             </div>
+
+            <div style={{ marginTop: 12 }}>
+              <h4>Import ActivityWatch JSON (paste and press Import)</h4>
+              <textarea id="aw-import-text" placeholder="Paste AW JSON array here" style={{ width: '100%', height: 120 }} />
+              <div style={{ marginTop: 8 }}>
+                <button className="button button-primary button-sm" onClick={async () => {
+                  try {
+                    const txt = document.getElementById('aw-import-text').value;
+                    if (!txt) return alert('Paste AW JSON first');
+                    const { default: aw } = await import('./activitywatch.js');
+                    let parsed = JSON.parse(txt);
+                    await aw.importAwArray(parsed);
+                    // reload stats and AW data
+                    const { default: stats } = await import('./stats.js');
+                    const weekly = await stats.getWeeklyStats(new Date());
+                    const monthly = await stats.getMonthlyStats(new Date());
+                    const trend = await stats.getTrend('productivity', 14);
+                    const daily = await stats.getDailyStats(new Date());
+                    setStatsState({ daily, weekly, monthly, trend, workout: stats.workout });
+                    alert('Imported ActivityWatch events');
+                  } catch (e) {
+                    console.error('AW import failed', e);
+                    alert('Import failed: ' + (e.message || e));
+                  }
+                }}>Import AW JSON</button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <h4>Search Tasks</h4>
+              <input id="task-search-input" placeholder="Search tasks by text or id" style={{ width: '100%', padding: 6 }} />
+              <div style={{ marginTop: 8 }}>
+                <button className="button button-secondary button-sm" onClick={async () => {
+                  try {
+                    const q = document.getElementById('task-search-input').value.trim();
+                    if (!q) return alert('Enter search query');
+                    const dm = await import('./dataModelAsync.js');
+                    const results = await dm.searchTasks(q);
+                    alert(`Found ${results.length} matching tasks`);
+                  } catch (e) {
+                    console.error('Search failed', e);
+                    alert('Search failed');
+                  }
+                }}>Search</button>
+              </div>
+            </div>
+
           </details>
         </div>
       </div>
