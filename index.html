@@ -8,6 +8,31 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Runtime error overlay for debugging blank screen in production
+      window.addEventListener('error', function (e) {
+        try {
+          const root = document.getElementById('root');
+          if (root) {
+            root.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;background:#b00020;padding:16px;margin:0;">Runtime error:\n' + (e && e.error && e.error.stack ? e.error.stack : (e && e.message ? e.message : String(e))) + '</pre>';
+            document.body.style.background = '#b00020';
+          }
+        } catch (ex) {
+          /* ignore */
+        }
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        try {
+          const root = document.getElementById('root');
+          if (root) {
+            root.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;background:#b00020;padding:16px;margin:0;">Unhandled promise rejection:\n' + (e && e.reason && e.reason.stack ? e.reason.stack : String(e && e.reason)) + '</pre>';
+            document.body.style.background = '#b00020';
+          }
+        } catch (ex) {
+          /* ignore */
+        }
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
