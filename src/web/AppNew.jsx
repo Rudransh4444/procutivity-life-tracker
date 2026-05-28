@@ -163,6 +163,24 @@ export function App() {
     if (!aiConfig.apiKey && !aiConfig.openaiApiKey) {
       setShowSettings(true);
     }
+
+    // Generate recurring tasks for today and schedule reminders
+    (async () => {
+      try {
+        const { default: recurrence } = await import('./recurrence.js');
+        const { default: reminders } = await import('./reminders.js');
+        const created = await recurrence.generateForDate(new Date());
+        if (created && created.length > 0) {
+          // reload tasks from storage and update state
+          const currentTasks = loadJSON(LS.tasks, []);
+          setTasks(currentTasks);
+        }
+        // schedule any saved reminders
+        await reminders.scheduleAll();
+      } catch (e) {
+        console.warn('recurrence/reminders init error', e);
+      }
+    })();
   }, []);
 
   const backgroundImage = backgroundImages[timeOfDay];
