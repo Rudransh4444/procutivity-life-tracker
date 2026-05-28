@@ -93,20 +93,47 @@ export function getMoodTrend(days = 7) {
 
 // Productivity scoring
 export function calculateProductivityScore(taskData) {
+  // Backwards-compatible local-first productivity score calculator.
+  // Prioritize weighted task completion and consistency; mood and project progress are bonuses.
   const {
     tasksCompletedToday = 0,
+    totalTasksToday = 0,
+    totalTaskWeight = 0,
+    completedTaskWeight = 0,
     focusTimeMinutes = 0,
     moodScore = 5,
-    projectProgress = 0 // 0-100
-  } = taskData;
+    projectProgress = 0, // 0-100
+    recentDailyScores = [] // optional array of previous daily scores for consistency
+  } = taskData || {};
 
-  let score = 0;
-  score += Math.min(tasksCompletedToday * 10, 50); // Up to 50 points
-  score += Math.min(Math.floor(focusTimeMinutes / 10), 20); // Up to 20 points
-  score += (moodScore >= 7 ? 15 : moodScore >= 4 ? 10 : 5); // Mood bonus
-  score += Math.floor(projectProgress / 10); // Up to 10 points from project progress
+  // Completion component (up to 60)
+  let completionRatio = 0;
+  if (totalTaskWeight > 0) completionRatio = (completedTaskWeight / totalTaskWeight);
+  else if (totalTasksToday > 0) completionRatio = Math.min(tasksCompletedToday / totalTasksToday, 1);
+  const completionScore = Math.round(Math.min(Math.max(completionRatio, 0), 1) * 60);
 
-  return Math.min(Math.floor(score), 100);
+  // Focus component (up to 15)
+  const focusScore = Math.min(Math.floor(focusTimeMinutes / 10), 15);
+
+  // Mood bonus (up to 10)
+  const moodBonus = moodScore >= 8 ? 10 : moodScore >= 6 ? 7 : moodScore >= 4 ? 4 : 1;
+
+  // Project progress bonus (up to 10)
+  const projectBonus = Math.min(Math.floor(projectProgress / 10), 10);
+
+  // Consistency component (up to 5) — percentage of recent days with score >= 50
+  let consistencyScore = 0;
+  try {
+    if (Array.isArray(recentDailyScores) && recentDailyScores.length > 0) {
+      const goodDays = recentDailyScores.filter(s => Number(s) >= 50).length;
+      consistencyScore = Math.round((goodDays / recentDailyScores.length) * 5);
+    }
+  } catch (e) {
+    consistencyScore = 0;
+  }
+
+  const raw = completionScore + focusScore + moodBonus + projectBonus + consistencyScore;
+  return Math.min(100, Math.max(0, Math.floor(raw)));
 }
 
 export function saveProductivityMetric(date, score, metadata = {}) {
