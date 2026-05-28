@@ -109,11 +109,12 @@ export async function callAi(prompt, config) {
   }
   const provider = config.provider || 'openai';
   if (provider === 'openai') {
+    const apikey = config.apiKey || config.openaiApiKey || '';
     const response = await fetch(config.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.apiKey || ''}`
+        Authorization: `Bearer ${apikey}`
       },
       body: JSON.stringify({
         model: config.model || 'llama-3.1-8b-instant',

@@ -160,7 +160,7 @@ export function App() {
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
     setTodayMood(todayMoodEvent || null);
 
-    if (!aiConfig.apiKey) {
+    if (!aiConfig.apiKey && !aiConfig.openaiApiKey) {
       setShowSettings(true);
     }
   }, []);
