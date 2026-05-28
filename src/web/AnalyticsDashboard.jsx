@@ -86,6 +86,16 @@ export function AnalyticsDashboard({
       });
   }, [awData]);
 
+  // Weekly stats summary (optional)
+  const weeklySummary = useMemo(() => {
+    if (!stats || !stats.weekly) return null;
+    return {
+      tasksTotal: stats.weekly.totalTasks || 0,
+      completed: stats.weekly.completedTasks || 0,
+      focus: stats.weekly.focus || 0
+    };
+  }, [stats]);
+
   return (
     <div className="analytics-dashboard">
       {/* Header */}
@@ -187,6 +197,27 @@ export function AnalyticsDashboard({
             ))}
           </div>
           <p className="text-xs text-muted mt-md">Data from ActivityWatch + Chrome extension</p>
+        </div>
+      )}
+
+      {/* Weekly summary (from stats) */}
+      {weeklySummary && (
+        <div className="card weekly-summary-card">
+          <h3>This Week</h3>
+          <div className="weekly-grid">
+            <div className="weekly-item">
+              <div className="weekly-num">{weeklySummary.tasksTotal}</div>
+              <div className="weekly-label">Tasks</div>
+            </div>
+            <div className="weekly-item">
+              <div className="weekly-num">{weeklySummary.completed}</div>
+              <div className="weekly-label">Completed</div>
+            </div>
+            <div className="weekly-item">
+              <div className="weekly-num">{Math.round(weeklySummary.focus)}</div>
+              <div className="weekly-label">Focus (min)</div>
+            </div>
+          </div>
         </div>
       )}
 

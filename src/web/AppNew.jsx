@@ -121,6 +121,7 @@ export function App() {
   const [timeOfDay, setTimeOfDay] = useState(() => getTimeOfDay());
   const [showChrome, setShowChrome] = useState(false);
   const [showWidgets, setShowWidgets] = useState(false);
+  const [statsState, setStatsState] = useState({ daily: null, weekly: null, monthly: null, trend: [] });
 
   useEffect(() => {
     const syncTimeOfDay = () => setTimeOfDay(getTimeOfDay());
@@ -169,6 +170,8 @@ export function App() {
       try {
         const { default: recurrence } = await import('./recurrence.js');
         const { default: reminders } = await import('./reminders.js');
+        const { default: stats } = await import('./stats.js');
+
         const created = await recurrence.generateForDate(new Date());
         if (created && created.length > 0) {
           // reload tasks from storage and update state
@@ -177,6 +180,17 @@ export function App() {
         }
         // schedule any saved reminders
         await reminders.scheduleAll();
+
+        // load stats
+        try {
+          const weekly = await stats.getWeeklyStats(new Date());
+          const monthly = await stats.getMonthlyStats(new Date());
+          const trend = await stats.getTrend('productivity', 14);
+          const daily = await stats.getDailyStats(new Date());
+          setStatsState({ daily, weekly, monthly, trend });
+        } catch (es) {
+          console.warn('stats load error', es);
+        }
       } catch (e) {
         console.warn('recurrence/reminders init error', e);
       }
@@ -323,6 +337,7 @@ export function App() {
           awData={awData}
           todayMood={todayMood}
           sceneLabel={sceneLabel}
+          stats={statsState}
           onAddTask={() => {
             const title = prompt('Task title:');
             if (title) handleAddTask(title);
