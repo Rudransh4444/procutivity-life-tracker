@@ -17,8 +17,10 @@ const LS = {
 
 export { LS };
 
-// Utilities backed by IndexedDB via storage.js
+// Utilities backed by storage.js (local-first)
 import { loadJSON, saveJSON, ensureSeed, uid } from './storage.js';
+// Re-export storage helpers so other modules (AppNew.jsx) can use them directly
+export { loadJSON, saveJSON, ensureSeed, uid };
 
 // Mood tracking
 export function addMoodEvent(score, notes = '') {

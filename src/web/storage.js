@@ -1,84 +1,37 @@
-// storage.js — IndexedDB-backed KV store with localStorage fallback
+// storage.js — simple synchronous localStorage-backed KV store (local-first)
 // Exports: loadJSON, saveJSON, ensureSeed, uid
 
-const DB_NAME = 'ai-life-db';
-const DB_VERSION = 1;
-const STORE_KV = 'kv';
+// This implementation is intentionally synchronous to keep the UI predictable
+// and to honor the "local-first" design. It uses localStorage only.
 
-function openDB() {
-  if (!('indexedDB' in window)) return Promise.resolve(null);
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (ev) => {
-      const db = ev.target.result;
-      if (!db.objectStoreNames.contains(STORE_KV)) db.createObjectStore(STORE_KV, { keyPath: 'k' });
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(null); // fallback on error
-  });
-}
-
-async function getKV(key) {
+export function loadJSON(key, fallback) {
   try {
-    const db = await openDB();
-    if (!db) return localStorage.getItem(key);
-    return await new Promise((res) => {
-      const tx = db.transaction(STORE_KV, 'readonly');
-      const store = tx.objectStore(STORE_KV);
-      const r = store.get(key);
-      r.onsuccess = () => {
-        const v = r.result ? r.result.v : null;
-        res(v == null ? null : v);
-      };
-      r.onerror = () => res(null);
-    });
-  } catch {
-    return localStorage.getItem(key);
-  }
-}
-
-async function setKV(key, value) {
-  try {
-    const db = await openDB();
-    if (!db) {
-      localStorage.setItem(key, value);
-      return;
-    }
-    await new Promise((res, rej) => {
-      const tx = db.transaction(STORE_KV, 'readwrite');
-      const store = tx.objectStore(STORE_KV);
-      const r = store.put({ k: key, v: value });
-      r.onsuccess = () => res();
-      r.onerror = () => rej(r.error);
-    });
-  } catch {
-    localStorage.setItem(key, value);
-  }
-}
-
-export async function loadJSON(key, fallback) {
-  try {
-    const raw = await getKV(key);
+    const raw = localStorage.getItem(key);
     if (raw == null) return fallback;
     return JSON.parse(raw);
-  } catch {
+  } catch (e) {
     return fallback;
   }
 }
 
-export async function saveJSON(key, value) {
+export function saveJSON(key, value) {
   try {
-    await setKV(key, JSON.stringify(value));
-  } catch (e) {
-    // best-effort fallback
     localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    // best-effort no-op on quota errors
+    console.warn('saveJSON failed for', key, e?.message);
   }
 }
 
-export async function ensureSeed(key, fallback) {
-  const current = await loadJSON(key, null);
-  if (current == null) await saveJSON(key, fallback);
-  return await loadJSON(key, fallback);
+export function ensureSeed(key, fallback) {
+  try {
+    const cur = loadJSON(key, null);
+    if (cur == null) saveJSON(key, fallback);
+    return loadJSON(key, fallback);
+  } catch (e) {
+    saveJSON(key, fallback);
+    return fallback;
+  }
 }
 
 export function uid(prefix = 'id') {
