@@ -38,7 +38,7 @@ const defaultAwData = [];
 
 function usePersistedState(key, fallback) {
   const [value, setValue] = useState(() => ensureSeed(key, fallback));
-  React.useEffect(() => saveJSON(key, value), [key, value]);
+  useEffect(() => saveJSON(key, value), [key, value]);
   return [value, setValue];
 }
 
@@ -54,44 +54,48 @@ function pickGreetingMessage({ timeOfDay, hour, moodScore, taskCount, projectCou
   const hasProjects = Number(projectCount || 0) > 0;
 
   const messages = [
-    { id: 'm1', when: 'morning', text: 'Morning. Let'''s get things done.', priority: 5 },
+    { id: 'm1', when: 'morning', text: "Morning. Let's get things done.", priority: 5 },
     { id: 'm2', when: 'morning', text: 'Good morning. One clear step first.', priority: 4 },
-    { id: 'm3', when: 'morning', text: 'Morning � we can keep this simple.', priority: 3 },
-    { id: 'm4', when: 'morning', text: 'Let'''s start clean and steady.', priority: 3 },
+    { id: 'm3', when: 'morning', text: 'Morning - we can keep this simple.', priority: 3 },
+    { id: 'm4', when: 'morning', text: "Let's start clean and steady.", priority: 3 },
     { id: 'm5', when: 'morning', text: 'Good morning. Ready when you are.', priority: 4 },
     { id: 'm6', when: 'morning', text: 'A fresh start. Keep it light.', priority: 2, condition: () => !hasTasks },
-    { id: 'm7', when: 'morning', text: 'Morning. We'''ll take this one step at a time.', priority: 3 },
-    { id: 'm8', when: 'morning', text: 'Good morning. Let'''s make the first move.', priority: 4 },
-    { id: 'm9', when: 'morning', text: 'You'''ve got this. Start small.', priority: 3 },
-    { id: 'm10', when: 'morning', text: 'Morning. If today feels heavy, we'''ll keep it light.', priority: 5, condition: () => isLowMood },
+    { id: 'm7', when: 'morning', text: "Morning. We'll take this one step at a time.", priority: 3 },
+    { id: 'm8', when: 'morning', text: "Good morning. Let's make the first move.", priority: 4 },
+    { id: 'm9', when: 'morning', text: "You've got this. Start small.", priority: 3 },
+    { id: 'm10', when: 'morning', text: "Morning. If today feels heavy, we'll keep it light.", priority: 5, condition: () => isLowMood },
 
-    { id: 'a1', when: 'evening', text: 'Good afternoon, let'''s keep it moving.', priority: 5 },
-    { id: 'a2', when: 'evening', text: 'Hey � still time to get something useful done.', priority: 4 },
-    { id: 'a3', when: 'evening', text: 'Afternoon check-in. What'''s next?', priority: 3 },
-    { id: 'a4', when: 'evening', text: 'Let'''s land one solid win.', priority: 5 },
+    { id: 'a1', when: 'evening', text: "Good afternoon, let's keep it moving.", priority: 5 },
+    { id: 'a2', when: 'evening', text: 'Hey - still time to get something useful done.', priority: 4 },
+    { id: 'a3', when: 'evening', text: "Afternoon check-in. What's next?", priority: 3 },
+    { id: 'a4', when: 'evening', text: "Let's land one solid win.", priority: 5 },
     { id: 'a5', when: 'evening', text: 'Good afternoon. Keep the pace calm.', priority: 3 },
-    { id: 'a6', when: 'evening', text: 'We'''re in the middle of it. Keep going.', priority: 2 },
+    { id: 'a6', when: 'evening', text: "We're in the middle of it. Keep going.", priority: 2 },
     { id: 'a7', when: 'evening', text: 'Good afternoon. One more useful step.', priority: 4 },
-    { id: 'a8', when: 'evening', text: 'Let'''s finish the next thing, not everything.', priority: 4, condition: () => hasTasks },
+    { id: 'a8', when: 'evening', text: "Let's finish the next thing, not everything.", priority: 4, condition: () => hasTasks },
     { id: 'a9', when: 'evening', text: 'A steady afternoon still counts.', priority: 2 },
     { id: 'a10', when: 'evening', text: 'Good afternoon. Small progress is still progress.', priority: 4, condition: () => hasProjects },
 
-    { id: 'n1', when: 'night', text: 'Good evening. Let'''s wind down or finish clean.', priority: 5 },
+    { id: 'n1', when: 'night', text: "Good evening. Let's wind down or finish clean.", priority: 5 },
     { id: 'n2', when: 'night', text: 'Night mode. Stay calm, keep it sharp.', priority: 3 },
-    { id: 'n3', when: 'night', text: 'One last pass, then you'''re good.', priority: 4 },
+    { id: 'n3', when: 'night', text: "One last pass, then you're good.", priority: 4 },
     { id: 'n4', when: 'night', text: 'Good evening. No rush now.', priority: 3 },
     { id: 'n5', when: 'night', text: 'Night time. Clear head, easy pace.', priority: 2 },
-    { id: 'n6', when: 'night', text: 'Let'''s close the day neatly.', priority: 4 },
-    { id: 'n7', when: 'night', text: 'Good evening. You'''re doing fine.', priority: 3 },
+    { id: 'n6', when: 'night', text: "Let's close the day neatly.", priority: 4 },
+    { id: 'n7', when: 'night', text: "Good evening. You're doing fine.", priority: 3 },
     { id: 'n8', when: 'night', text: 'Night focus. Just one useful move.', priority: 4, condition: () => hasTasks },
-    { id: 'n9', when: 'night', text: 'If tonight feels slow, that'''s okay.', priority: 5, condition: () => isLowMood },
+    { id: 'n9', when: 'night', text: "If tonight feels slow, that's okay.", priority: 5, condition: () => isLowMood },
     { id: 'n10', when: 'night', text: 'Late hour, simple work, steady finish.', priority: 2 }
   ];
 
-  const pool = messages.filter((message) => message.when === timeOfDay && (!message.condition || message.condition()));
+  const pool = messages.filter(
+    (message) => message.when === timeOfDay && (!message.condition || message.condition())
+  );
+
   const ranked = pool.length ? pool : messages.filter((message) => message.when === timeOfDay);
   const sorted = ranked.sort((a, b) => b.priority - a.priority);
   const indexSeed = Math.abs(((hour || 0) * 13) + (Number(moodScore || 0) * 7) + taskCount + projectCount);
+
   return sorted[indexSeed % sorted.length] || sorted[0] || messages[0];
 }
 
@@ -165,6 +169,7 @@ export function App() {
     const todayMoodEvent = moodEvents
       .filter((e) => e.date === today)
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+
     setTodayMood(todayMoodEvent || null);
   }, []);
 
@@ -198,10 +203,12 @@ export function App() {
     const today = new Date().toISOString().split('T')[0];
     const todaysTasks = updated.filter((t) => t.date === today);
     const completed = todaysTasks.filter((t) => t.completed).length;
+
     const score = calculateProductivityScore({
       tasksCompletedToday: completed,
       moodScore: todayMood?.score || 5
     });
+
     saveProductivityMetric(today, score);
     setProductivityMetrics(getProductivityMetrics(7));
   };
@@ -235,6 +242,7 @@ export function App() {
 
   const today = new Date().toISOString().split('T')[0];
   const todaysTasks = tasks.filter((t) => t.date === today);
+
   const greeting = pickGreetingMessage({
     timeOfDay,
     hour: new Date().getHours(),
@@ -243,109 +251,118 @@ export function App() {
     projectCount: projects.length
   });
 
-  const shellStyle = useMemo(() => ({ '--scene-image': `url(${backgroundImage})` }), [backgroundImage]);
+  const shellStyle = useMemo(
+    () => ({ '--scene-image': `url(${backgroundImage})` }),
+    [backgroundImage]
+  );
 
   return (
-    <div className={`app-shell app-shell-${timeOfDay} ${showChrome ? 'app-shell--ready' : 'app-shell--cold'}`} style={shellStyle} data-time-of-day={timeOfDay}>
-      <div className=app-shell__overlay />
-      <div className=app-shell__glow app-shell__glow--left />
-      <div className=app-shell__glow app-shell__glow--right />
+    <div
+      className={`app-shell app-shell-${timeOfDay} ${showChrome ? 'app-shell--ready' : 'app-shell--cold'}`}
+      style={shellStyle}
+      data-time-of-day={timeOfDay}
+    >
+      <div className="app-shell__overlay" />
+      <div className="app-shell__glow app-shell__glow--left" />
+      <div className="app-shell__glow app-shell__glow--right" />
 
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === 'general' && (
-        <div className={intro-hero ${showChrome ? '''intro-hero--ready''' : '''intro-hero--hidden'''}  ${showWidgets ? '''intro-hero--compact''' : '"'}}>
- <div className=intro-hero__copy>
- <div className=intro-hero__eyebrow>{sceneLabel}</div>
- <h1 className=intro-hero__title>{greeting.text}</h1>
- <p className=intro-hero__subtitle>
- Let'''s get things done.
- </p>
- </div>
- </div>
- )}
+        <div
+          className={`intro-hero ${showChrome ? 'intro-hero--ready' : 'intro-hero--hidden'} ${
+            showWidgets ? 'intro-hero--compact' : ''
+          }`}
+        >
+          <div className="intro-hero__copy">
+            <div className="intro-hero__eyebrow">{sceneLabel}</div>
+            <h1 className="intro-hero__title">{greeting.text}</h1>
+            <p className="intro-hero__subtitle">Let's get things done.</p>
+          </div>
+        </div>
+      )}
 
- <div className={ ab-content ${showWidgets ? '''tab-content--visible''' : ''}}>
- {activeTab === '''general''' && (
- <div className=tab-pane tab-pane--general>
- <AnalyticsDashboard
- tasks={tasks}
- projects={projects}
- moodTrend={moodTrend}
- productivityMetrics={productivityMetrics}
- awData={awData}
- todayMood={todayMood}
- sceneLabel={sceneLabel}
- onAddTask={() => {
- const title = prompt('''Task title:''');
- if (title) handleAddTask(title);
- }}
- onCheckInMorning={() => setShowMorningRoutine(true)}
- onCompleteTask={handleCompleteTask}
- onSelectTask={() => {}}
- />
- 
- <div className=debug-panel>
- <details>
- <summary>Debug Info</summary>
- <pre>
- Tasks: {tasks.length}
- {'''\n'''}Projects: {projects.length}
- {'''\n'''}Today'''s tasks: {todaysTasks.length}
- {'''\n'''}Mood: {todayMood?.score}/10
- {'''\n'''}API Key: {aiConfig.apiKey ? '''***SET***''' : '''NOT SET'''}
- {'''\n'''}Current hour: {new Date().getHours()}
- {'''\n'''}Morning routine show: {shouldShowMorningRoutine()}
- {'''\n'''}Evening routine show: {shouldShowEveningRoutine()}
- </pre>
- </details>
- </div>
- </div>
- )}
+      <div className={`tab-content ${showWidgets ? 'tab-content--visible' : ''}`}>
+        {activeTab === 'general' && (
+          <div className="tab-pane tab-pane--general">
+            <AnalyticsDashboard
+              tasks={tasks}
+              projects={projects}
+              moodTrend={moodTrend}
+              productivityMetrics={productivityMetrics}
+              awData={awData}
+              todayMood={todayMood}
+              sceneLabel={sceneLabel}
+              onAddTask={() => {
+                const title = prompt('Task title:');
+                if (title) handleAddTask(title);
+              }}
+              onCheckInMorning={() => setShowMorningRoutine(true)}
+              onCompleteTask={handleCompleteTask}
+              onSelectTask={() => {}}
+            />
 
- {activeTab === 'stats' && (
- <div className="tab-pane tab-pane--stats">
- <StatsTab
- tasks={tasks}
- moodTrend={moodTrend}
- productivityMetrics={productivityMetrics}
- awData={awData}
- />
- </div>
- )}
+            <div className="debug-panel">
+              <details>
+                <summary>Debug Info</summary>
+                <pre>
+{`Tasks: ${tasks.length}
+Projects: ${projects.length}
+Today's tasks: ${todaysTasks.length}
+Mood: ${todayMood?.score}/10
+API Key: ${aiConfig.apiKey ? '***SET***' : 'NOT SET'}
+Current hour: ${new Date().getHours()}
+Morning routine show: ${shouldShowMorningRoutine().toString()}
+Evening routine show: ${shouldShowEveningRoutine().toString()}`}
+                </pre>
+              </details>
+            </div>
+          </div>
+        )}
 
- {activeTab === 'settings' && (
- <div className="tab-pane tab-pane--settings">
- <SettingsTab
- aiConfig={aiConfig}
- onSaveConfig={handleSaveConfig}
- />
- </div>
- )}
- </div>
+        {activeTab === 'stats' && (
+          <div className="tab-pane tab-pane--stats">
+            <StatsTab
+              tasks={tasks}
+              moodTrend={moodTrend}
+              productivityMetrics={productivityMetrics}
+              awData={awData}
+            />
+          </div>
+        )}
 
- {showMorningRoutine && (
- <MorningRoutineModal
- projects={projects}
- currentTasks={todaysTasks}
- aiConfig={aiConfig}
- onAddNewTasks={handleAddNewTasks}
- onComplete={() => {
- markMorningRoutineComplete();
- setShowMorningRoutine(false);
- }}
- />
- )}
+        {activeTab === 'settings' && (
+          <div className="tab-pane tab-pane--settings">
+            <SettingsTab
+              aiConfig={aiConfig}
+              onSaveConfig={handleSaveConfig}
+            />
+          </div>
+        )}
+      </div>
 
- {showEveningRoutine && (
- <EveningRoutineModal
- previousMood={todayMood?.score}
- onSaveMood={handleEveningReview}
- onComplete={() => setShowEveningRoutine(false)}
- />
- )}
- </div>
- );
+      {showMorningRoutine && (
+        <MorningRoutineModal
+          projects={projects}
+          currentTasks={todaysTasks}
+          aiConfig={aiConfig}
+          onAddNewTasks={handleAddNewTasks}
+          onComplete={() => {
+            markMorningRoutineComplete();
+            setShowMorningRoutine(false);
+          }}
+        />
+      )}
+
+      {showEveningRoutine && (
+        <EveningRoutineModal
+          previousMood={todayMood?.score}
+          onSaveMood={handleEveningReview}
+          onComplete={() => setShowEveningRoutine(false)}
+        />
+      )}
+    </div>
+  );
 }
 
 export default App;
