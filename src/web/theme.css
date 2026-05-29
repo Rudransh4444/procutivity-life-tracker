@@ -7,6 +7,11 @@
   --bg-tertiary: rgb(35, 40, 65);
   --bg-hover: rgb(45, 52, 80);
 
+  /* Greeting gradient colors (NEW - Phase 2) */
+  --accent-warm: rgb(255, 201, 133); /* Gold-orange */
+  --accent-cool: rgb(157, 220, 255); /* Cool blue */
+  --gradient-gold-blue: linear-gradient(135deg, rgba(255, 245, 220, 1) 0%, rgba(255, 201, 133, 1) 35%, rgba(157, 220, 255, 1) 100%);
+
   /* Neon accents */
   --accent-teal: rgb(0, 240, 220); /* Primary focus color */
   --accent-teal-dark: rgb(0, 180, 165);

@@ -6,3 +6,4 @@ dist/
 .vscode/
 data/ai_config.json
 .vercel
+.env*

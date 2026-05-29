@@ -12,16 +12,45 @@ const LS = {
   awConfig: 'lap.aw_config',
   dailyRoutineConfig: 'lap.daily_routine_config',
   madeTimeLastMorningCheck: 'lap.made_time_last_morning_check',
-  madeTimeLastEveningCheck: 'lap.made_time_last_evening_check',
-  uiActiveTab: 'lap.ui.active_tab'
+  madeTimeLastEveningCheck: 'lap.made_time_last_evening_check'
 };
 
 export { LS };
 
-// Utilities backed by storage.js (local-first)
-import { loadJSON, saveJSON, ensureSeed, uid } from './storage.js';
-// Re-export storage helpers so other modules (AppNew.jsx) can use them directly
-export { loadJSON, saveJSON, ensureSeed, uid };
+// Utilities: keep synchronous wrappers (localStorage) for UI imports, and async versions via storage.js for background tasks
+import { loadJSON as loadJSONAsync, saveJSON as saveJSONAsync, ensureSeed as ensureSeedAsync, uid as uidAsync } from './storage.js';
+
+// Synchronous helpers (used by UI code that expects immediate values)
+export function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+export function saveJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // best-effort
+  }
+}
+
+export function ensureSeed(key, fallback) {
+  const current = loadJSON(key, null);
+  if (current == null) saveJSON(key, fallback);
+  return loadJSON(key, fallback);
+}
+
+export function uid(prefix = 'id') {
+  const suffix = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+  return `${prefix}-${suffix}`;
+}
+
+// Async functions are available via storage.js exports when needed (loadJSONAsync etc.)
 
 // Mood tracking
 export function addMoodEvent(score, notes = '') {
@@ -94,47 +123,20 @@ export function getMoodTrend(days = 7) {
 
 // Productivity scoring
 export function calculateProductivityScore(taskData) {
-  // Backwards-compatible local-first productivity score calculator.
-  // Prioritize weighted task completion and consistency; mood and project progress are bonuses.
   const {
     tasksCompletedToday = 0,
-    totalTasksToday = 0,
-    totalTaskWeight = 0,
-    completedTaskWeight = 0,
     focusTimeMinutes = 0,
     moodScore = 5,
-    projectProgress = 0, // 0-100
-    recentDailyScores = [] // optional array of previous daily scores for consistency
-  } = taskData || {};
+    projectProgress = 0 // 0-100
+  } = taskData;
 
-  // Completion component (up to 60)
-  let completionRatio = 0;
-  if (totalTaskWeight > 0) completionRatio = (completedTaskWeight / totalTaskWeight);
-  else if (totalTasksToday > 0) completionRatio = Math.min(tasksCompletedToday / totalTasksToday, 1);
-  const completionScore = Math.round(Math.min(Math.max(completionRatio, 0), 1) * 60);
+  let score = 0;
+  score += Math.min(tasksCompletedToday * 10, 50); // Up to 50 points
+  score += Math.min(Math.floor(focusTimeMinutes / 10), 20); // Up to 20 points
+  score += (moodScore >= 7 ? 15 : moodScore >= 4 ? 10 : 5); // Mood bonus
+  score += Math.floor(projectProgress / 10); // Up to 10 points from project progress
 
-  // Focus component (up to 15)
-  const focusScore = Math.min(Math.floor(focusTimeMinutes / 10), 15);
-
-  // Mood bonus (up to 10)
-  const moodBonus = moodScore >= 8 ? 10 : moodScore >= 6 ? 7 : moodScore >= 4 ? 4 : 1;
-
-  // Project progress bonus (up to 10)
-  const projectBonus = Math.min(Math.floor(projectProgress / 10), 10);
-
-  // Consistency component (up to 5) — percentage of recent days with score >= 50
-  let consistencyScore = 0;
-  try {
-    if (Array.isArray(recentDailyScores) && recentDailyScores.length > 0) {
-      const goodDays = recentDailyScores.filter(s => Number(s) >= 50).length;
-      consistencyScore = Math.round((goodDays / recentDailyScores.length) * 5);
-    }
-  } catch (e) {
-    consistencyScore = 0;
-  }
-
-  const raw = completionScore + focusScore + moodBonus + projectBonus + consistencyScore;
-  return Math.min(100, Math.max(0, Math.floor(raw)));
+  return Math.min(Math.floor(score), 100);
 }
 
 export function saveProductivityMetric(date, score, metadata = {}) {
