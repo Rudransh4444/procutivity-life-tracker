@@ -7,13 +7,23 @@ import { FiSave, FiExternalLink } from 'react-icons/fi';
 export function SettingsTab({ aiConfig, onSaveConfig }) {
   const [apiKey, setApiKey] = useState(aiConfig.apiKey || '');
   const [awHost, setAwHost] = useState(aiConfig.awHost || 'http://localhost:5600');
+  const [githubOwner, setGithubOwner] = useState(aiConfig.githubOwner || '');
+  const [githubRepo, setGithubRepo] = useState(aiConfig.githubRepo || '');
+  const [githubBranch, setGithubBranch] = useState(aiConfig.githubBranch || 'main');
+  const [githubPathPrefix, setGithubPathPrefix] = useState(aiConfig.githubPathPrefix || 'Obsidian/Daily');
+  const [githubToken, setGithubToken] = useState(aiConfig.githubToken || '');
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     onSaveConfig({
       ...aiConfig,
       apiKey,
-      awHost
+      awHost,
+      githubOwner,
+      githubRepo,
+      githubBranch,
+      githubPathPrefix,
+      githubToken
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -63,6 +73,73 @@ export function SettingsTab({ aiConfig, onSaveConfig }) {
               placeholder="http://localhost:5600"
               value={awHost}
               onChange={(e) => setAwHost(e.target.value)}
+              className="input-glass"
+            />
+          </div>
+
+          <div className="settings-field">
+            <label htmlFor="github-owner">GitHub Owner</label>
+            <p className="text-secondary text-sm">
+              Sync daily notes directly into the repository that backs your Obsidian vault.
+            </p>
+            <input
+              id="github-owner"
+              type="text"
+              placeholder="your-username"
+              value={githubOwner}
+              onChange={(e) => setGithubOwner(e.target.value)}
+              className="input-glass"
+            />
+          </div>
+
+          <div className="settings-field">
+            <label htmlFor="github-repo">GitHub Repository</label>
+            <input
+              id="github-repo"
+              type="text"
+              placeholder="your-vault-repo"
+              value={githubRepo}
+              onChange={(e) => setGithubRepo(e.target.value)}
+              className="input-glass"
+            />
+          </div>
+
+          <div className="settings-field settings-grid">
+            <div>
+              <label htmlFor="github-branch">Branch</label>
+              <input
+                id="github-branch"
+                type="text"
+                placeholder="main"
+                value={githubBranch}
+                onChange={(e) => setGithubBranch(e.target.value)}
+                className="input-glass"
+              />
+            </div>
+            <div>
+              <label htmlFor="github-path-prefix">Note Path Prefix</label>
+              <input
+                id="github-path-prefix"
+                type="text"
+                placeholder="Obsidian/Daily"
+                value={githubPathPrefix}
+                onChange={(e) => setGithubPathPrefix(e.target.value)}
+                className="input-glass"
+              />
+            </div>
+          </div>
+
+          <div className="settings-field">
+            <label htmlFor="github-token">GitHub Access Token</label>
+            <p className="text-secondary text-sm">
+              Use a fine-grained token with contents write access to the vault repo. Stored locally only.
+            </p>
+            <input
+              id="github-token"
+              type="password"
+              placeholder="ghp_..."
+              value={githubToken}
+              onChange={(e) => setGithubToken(e.target.value)}
               className="input-glass"
             />
           </div>

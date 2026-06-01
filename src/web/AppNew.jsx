@@ -31,7 +31,12 @@ const defaultAiConfig = {
   model: 'llama-3.1-8b-instant',
   temperature: 0.4,
   max_tokens: 400,
-  awHost: 'http://localhost:5600'
+  awHost: 'http://localhost:5600',
+  githubOwner: '',
+  githubRepo: '',
+  githubBranch: 'main',
+  githubPathPrefix: 'Obsidian/Daily',
+  githubToken: ''
 };
 
 const defaultAwData = [];
@@ -285,6 +290,30 @@ export function App() {
       <div className={`tab-content ${showWidgets ? 'tab-content--visible' : ''}`}>
         {activeTab === 'general' && (
           <div className="tab-pane tab-pane--general">
+            {showMorningRoutine && (
+              <MorningRoutineModal
+                projects={projects}
+                currentTasks={todaysTasks}
+                aiConfig={aiConfig}
+                onAddNewTasks={handleAddNewTasks}
+                onComplete={() => {
+                  markMorningRoutineComplete();
+                  setShowMorningRoutine(false);
+                }}
+              />
+            )}
+
+            {showEveningRoutine && (
+              <EveningRoutineModal
+                previousMood={todayMood?.score}
+                onSaveMood={handleEveningReview}
+                onComplete={() => {
+                  markEveningRoutineComplete();
+                  setShowEveningRoutine(false);
+                }}
+              />
+            )}
+
             <AnalyticsDashboard
               tasks={tasks}
               projects={projects}
@@ -294,10 +323,7 @@ export function App() {
               todayMood={todayMood}
               aiConfig={aiConfig}
               sceneLabel={sceneLabel}
-              onAddTask={() => {
-                const title = prompt('Task title:');
-                if (title) handleAddTask(title);
-              }}
+              onAddTask={handleAddTask}
               onCheckInMorning={() => setShowMorningRoutine(true)}
               onCompleteTask={handleCompleteTask}
               onSelectTask={() => {}}
@@ -342,26 +368,6 @@ Evening routine show: ${shouldShowEveningRoutine().toString()}`}
         )}
       </div>
 
-      {showMorningRoutine && (
-        <MorningRoutineModal
-          projects={projects}
-          currentTasks={todaysTasks}
-          aiConfig={aiConfig}
-          onAddNewTasks={handleAddNewTasks}
-          onComplete={() => {
-            markMorningRoutineComplete();
-            setShowMorningRoutine(false);
-          }}
-        />
-      )}
-
-      {showEveningRoutine && (
-        <EveningRoutineModal
-          previousMood={todayMood?.score}
-          onSaveMood={handleEveningReview}
-          onComplete={() => setShowEveningRoutine(false)}
-        />
-      )}
     </div>
   );
 }

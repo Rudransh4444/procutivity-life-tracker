@@ -35,14 +35,13 @@ export function EveningRoutineModal({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal evening-routine-modal">
-        <div className="modal-header">
-          <h2>Evening Review 🌙</h2>
-          <button className="button button-secondary button-sm" onClick={onComplete}>
-            <FiX size={20} />
-          </button>
-        </div>
+    <section className="card routine-panel evening-routine-panel">
+      <div className="modal-header">
+        <h2>Evening Review 🌙</h2>
+        <button className="button button-secondary button-sm" onClick={onComplete} type="button">
+          <FiX size={20} />
+        </button>
+      </div>
 
         {step === 'mood' && (
           <div className="routine-step">
@@ -112,8 +111,7 @@ export function EveningRoutineModal({
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </section>
   );
 }
 

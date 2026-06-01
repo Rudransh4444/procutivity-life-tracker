@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { loadJSON, saveJSON, uid } from './storage.js';
-import { exportDailyJournal } from './obsidian-export.js';
+import { LS } from './dataModel.js';
+import { syncDailyJournalToGitHub } from './obsidian-export.js';
 
 const JOUR_KEY = 'journals';
 
 export default function JournalPage() {
   const [entries, setEntries] = useState(() => loadJSON(JOUR_KEY, []));
   const [text, setText] = useState('');
+  const [syncStatus, setSyncStatus] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => setEntries(loadJSON(JOUR_KEY, [])), []);
 
@@ -20,15 +23,41 @@ export default function JournalPage() {
     setText('');
   }
 
+  async function syncToday() {
+    setSyncing(true);
+    setSyncStatus('');
+    try {
+      const config = loadJSON(LS.aiConfig, {});
+      const dateStr = new Date().toISOString().split('T')[0];
+      const result = await syncDailyJournalToGitHub(dateStr, config);
+      setSyncStatus(result.url ? `Synced to GitHub: ${result.url}` : `Synced ${result.path}`);
+    } catch (error) {
+      setSyncStatus(error.message || 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
     <div className="page journal-page">
       <h2>Journal</h2>
-      <div style={{ marginBottom: 12 }}>
-        <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Write your entry..." style={{ width: '100%', height: 120, padding:8 }} />
-        <div style={{ marginTop:8 }}>
+      <div className="card journal-card">
+        <textarea
+          className="journal-input input-glass"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Write your entry..."
+        />
+        <div className="journal-toolbar">
           <button className="button button-primary" onClick={add}>Add Entry</button>
-          <button className="button button-secondary" style={{ marginLeft:8 }} onClick={()=>exportDailyJournal(new Date().toISOString().split('T')[0])}>Export Today (Obsidian)</button>
+          <button className="button button-secondary" onClick={syncToday} disabled={syncing}>
+            {syncing ? 'Syncing…' : 'Sync to GitHub / Obsidian'}
+          </button>
         </div>
+        {syncStatus && <div className="journal-status text-sm text-secondary">{syncStatus}</div>}
+        <p className="text-muted text-xs journal-hint">
+          Notes sync straight to your GitHub-backed Obsidian vault. No file download is shown.
+        </p>
       </div>
 
       <div>

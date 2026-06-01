@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LineChart, Line, PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import { FiBarChart2, FiCalendar, FiTrendingUp } from 'react-icons/fi';
 
@@ -18,7 +18,7 @@ export function StatsTab({
   // 30-day productivity trend
   const productivity30Day = productivityMetrics.slice(-30);
 
-  // App usage distribution (pie chart)
+  // App usage distribution (ranked bars for decision-making clarity)
   const usageDistribution = React.useMemo(() => {
     if (!awData || awData.length === 0) return [];
     
@@ -153,34 +153,28 @@ export function StatsTab({
           <div className="card stats-card">
             <div className="stats-header">
               <FiBarChart2 size={20} />
-              <h3>App Usage Distribution</h3>
+              <h3>Top App Usage</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={usageDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}m`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {usageDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
+              <BarChart data={usageDistribution} layout="vertical" margin={{ left: 20, right: 24 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                <XAxis type="number" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)' }} />
+                <YAxis type="category" dataKey="name" stroke="var(--text-muted)" width={120} tick={{ fill: 'var(--text-muted)' }} />
                 <Tooltip
                   contentStyle={{
                     background: 'var(--bg-secondary)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(157, 220, 255, 0.22)',
                     borderRadius: '8px',
                     color: 'var(--text-primary)'
                   }}
                   formatter={(value) => `${value} minutes`}
                 />
-              </PieChart>
+                <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                  {usageDistribution.map((entry, index) => (
+                    <Cell key={`cell-${entry.name}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         )}

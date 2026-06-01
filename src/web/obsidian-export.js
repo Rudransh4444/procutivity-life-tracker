@@ -1,4 +1,4 @@
-// obsidian-export.js — local-only markdown export helpers for journals and daily summaries
+// obsidian-export.js — GitHub-backed markdown sync helpers for journals and daily summaries
 import { loadJSON, LS } from './dataModel.js';
 
 function getTasksForDate(dateStr) {
@@ -53,28 +53,107 @@ function buildMarkdown(dateStr) {
       : ['- No mood entries recorded']),
     '',
     '## Notes',
-    '- Export created locally by the app. No cloud sync is involved.'
+    '- Synced through GitHub into your Obsidian vault. No browser download is shown.'
   ];
 
   return lines.join('\n');
 }
 
-export async function exportDailyJournal(dateStr) {
-  const md = buildMarkdown(dateStr);
-  download(`${dateStr}-journal.md`, md);
-  return md;
+function normalizePathSegment(value) {
+  return String(value || '').trim().replace(/^\/+|\/+$/g, '');
 }
 
-function download(filename, text) {
-  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+function encodeBase64(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
 }
 
-export default { exportDailyJournal };
+function getJournalPath(dateStr, config = {}) {
+  const prefix = normalizePathSegment(config.githubPathPrefix || 'Obsidian/Daily');
+  return `${prefix ? `${prefix}/` : ''}${dateStr}-journal.md`;
+}
+
+function encodeGitHubPath(path) {
+  return String(path)
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+}
+
+function getGitHubConfig(config = {}) {
+  const owner = normalizePathSegment(config.githubOwner);
+  const repo = normalizePathSegment(config.githubRepo);
+  const branch = normalizePathSegment(config.githubBranch) || 'main';
+  const token = String(config.githubToken || '').trim();
+  const path = getJournalPath(new Date().toISOString().split('T')[0], config);
+
+  return { owner, repo, branch, token, path };
+}
+
+async function getExistingSha({ owner, repo, path, branch, token }) {
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeGitHubPath(path)}?ref=${encodeURIComponent(branch)}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`GitHub lookup failed (${response.status})`);
+  }
+
+  const data = await response.json();
+  return data?.sha || null;
+}
+
+export function buildDailyJournalMarkdown(dateStr) {
+  return buildMarkdown(dateStr);
+}
+
+export async function syncDailyJournalToGitHub(dateStr, config = loadJSON(LS.aiConfig, {})) {
+  const { owner, repo, branch, token, path } = getGitHubConfig(config);
+  if (!owner || !repo || !token) {
+    throw new Error('Configure GitHub owner, repo, and token first.');
+  }
+
+  const markdown = buildMarkdown(dateStr);
+  const sha = await getExistingSha({ owner, repo, path, branch, token });
+
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${encodeGitHubPath(path)}`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    },
+    body: JSON.stringify({
+      message: `Sync daily journal for ${dateStr}`,
+      content: encodeBase64(markdown),
+      branch,
+      ...(sha ? { sha } : {})
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`GitHub sync failed (${response.status}): ${detail}`);
+  }
+
+  const data = await response.json();
+  return {
+    path,
+    branch,
+    markdown,
+    url: data?.content?.html_url || data?.commit?.html_url || null,
+    commitSha: data?.commit?.sha || null
+  };
+}
+
+export default { buildDailyJournalMarkdown, syncDailyJournalToGitHub };

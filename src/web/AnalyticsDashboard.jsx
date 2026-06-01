@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { FiCheck, FiCalendar, FiPlus, FiZap, FiFeather } from 'react-icons/fi';
 import { HiOutlineFire } from 'react-icons/hi';
@@ -26,6 +26,8 @@ export function AnalyticsDashboard({
   const todaysTasks = tasks.filter((task) => task.date === today);
   const completedToday = todaysTasks.filter((task) => task.completed).length;
   const todayMoodScore = todayMood?.score || 5;
+  const composerRef = useRef(null);
+  const [quickTaskTitle, setQuickTaskTitle] = useState('');
   const [generatingTaskId, setGeneratingTaskId] = useState(null);
   const [taskBreakdowns, setTaskBreakdowns] = useState({});
 
@@ -60,6 +62,16 @@ export function AnalyticsDashboard({
       })
       .sort((a, b) => b.progress - a.progress);
   }, [tasks, projects]);
+
+  const handleQuickAddTask = (event) => {
+    event.preventDefault();
+    const title = quickTaskTitle.trim();
+    if (!title) return;
+
+    onAddTask?.(title);
+    setQuickTaskTitle('');
+    composerRef.current?.focus();
+  };
 
   const topSites = useMemo(() => {
     if (!awData || awData.length === 0) return [];
@@ -190,10 +202,27 @@ export function AnalyticsDashboard({
       <div className="card tasks-card">
         <div className="tasks-header">
           <h3>Today's Tasks</h3>
-          <button className="button button-primary button-sm" onClick={onAddTask}>
+          <button
+            className="button button-primary button-sm"
+            onClick={() => composerRef.current?.focus()}
+          >
             <FiPlus size={16} /> Add Task
           </button>
         </div>
+
+        <form className="task-composer" onSubmit={handleQuickAddTask}>
+          <input
+            ref={composerRef}
+            className="task-composer__input"
+            value={quickTaskTitle}
+            onChange={(event) => setQuickTaskTitle(event.target.value)}
+            placeholder="Type a task and press Enter"
+            aria-label="Add a new task"
+          />
+          <button className="button button-secondary button-sm" type="submit" disabled={!quickTaskTitle.trim()}>
+            Add
+          </button>
+        </form>
 
         <div className="tasks-list">
           {todaysTasks.length === 0 ? (
@@ -327,7 +356,7 @@ export function AnalyticsDashboard({
         <button className="button button-primary" onClick={onCheckInMorning}>
           <FiCalendar size={16} /> Check In
         </button>
-        <button className="button button-secondary" onClick={onAddTask}>
+        <button className="button button-secondary" onClick={() => composerRef.current?.focus()}>
           <FiPlus size={16} /> New Task
         </button>
         <button className="button button-secondary" onClick={onAddWorkout}>

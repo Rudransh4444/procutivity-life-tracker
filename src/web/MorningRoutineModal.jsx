@@ -123,14 +123,13 @@ Now, using the context above (yesterday summary, mood, projects, current tasks),
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal morning-routine-modal">
-        <div className="modal-header">
-          <h2>Good Morning! ☀️</h2>
-          <button className="button button-secondary button-sm" onClick={onComplete}>
-            <FiX size={20} />
-          </button>
-        </div>
+    <section className="card routine-panel morning-routine-panel">
+      <div className="modal-header">
+        <h2>Good Morning! ☀️</h2>
+        <button className="button button-secondary button-sm" onClick={onComplete} type="button">
+          <FiX size={20} />
+        </button>
+      </div>
 
         {step === 'mood' && (
           <div className="morning-step">
@@ -240,8 +239,7 @@ Now, using the context above (yesterday summary, mood, projects, current tasks),
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </section>
   );
 }
 
