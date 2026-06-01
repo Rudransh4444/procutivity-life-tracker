@@ -156,4 +156,27 @@ export async function syncDailyJournalToGitHub(dateStr, config = loadJSON(LS.aiC
   };
 }
 
+export async function quartzSyncToGitHub(config = loadJSON(LS.aiConfig, {})) {
+  const owner = normalizePathSegment(config.githubOwner);
+  const repo = normalizePathSegment(config.githubRepo);
+  const branch = normalizePathSegment(config.githubBranch) || 'main';
+  const token = String(config.githubToken || '').trim();
+  const pathPrefix = normalizePathSegment(config.githubQuartzPathPrefix || 'quartz_vault');
+
+  if (!owner || !repo || !token) throw new Error('Configure GitHub owner/repo/token in Settings');
+
+  const resp = await fetch('/api/quartz_sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ owner, repo, branch, token, pathPrefix })
+  });
+
+  if (!resp.ok) {
+    const detail = await resp.text();
+    throw new Error(`Quartz sync failed: ${detail}`);
+  }
+
+  return resp.json();
+}
+
 export default { buildDailyJournalMarkdown, syncDailyJournalToGitHub };

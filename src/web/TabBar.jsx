@@ -1,9 +1,9 @@
 import React from 'react';
-import { FiBarChart2, FiSettings } from 'react-icons/fi';
+import { FiBarChart2, FiSettings, FiCalendar, FiTrendingUp } from 'react-icons/fi';
 
 /**
  * Tab Navigation Bar
- * Centered at top of page, shows General | Stats | Settings tabs
+ * Centered at top of page, shows General | Stats | Workout | Journal | Insights | Settings tabs
  */
 export function TabBar({ activeTab, onTabChange }) {
   const tabs = [
