@@ -9,6 +9,9 @@ export function TabBar({ activeTab, onTabChange }) {
   const tabs = [
     { id: 'general', label: 'General', icon: null },
     { id: 'stats', label: 'Stats', icon: FiBarChart2 },
+    { id: 'workout', label: 'Workout', icon: FiBarChart2 },
+    { id: 'journal', label: 'Journal', icon: FiCalendar },
+    { id: 'insights', label: 'Insights', icon: FiTrendingUp },
     { id: 'settings', label: 'Settings', icon: FiSettings }
   ];
 

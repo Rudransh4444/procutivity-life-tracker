@@ -4,6 +4,9 @@ import '../web/dashboard.css';
 import TabBar from './TabBar.jsx';
 import AnalyticsDashboard from './AnalyticsDashboard.jsx';
 import StatsTab from './StatsTab.jsx';
+import FitnessPage from './FitnessPage.jsx';
+import JournalPage from './JournalPage.jsx';
+import InsightsTab from './InsightsTab.jsx';
 import SettingsTab from './SettingsTab.jsx';
 import MorningRoutineModal from './MorningRoutineModal.jsx';
 import EveningRoutineModal from './EveningRoutineModal.jsx';
@@ -355,6 +358,24 @@ Evening routine show: ${shouldShowEveningRoutine().toString()}`}
               productivityMetrics={productivityMetrics}
               awData={awData}
             />
+          </div>
+        )}
+
+        {activeTab === 'workout' && (
+          <div className="tab-pane tab-pane--workout">
+            <FitnessPage onAddWorkout={async () => { /* no-op placeholder */ }} />
+          </div>
+        )}
+
+        {activeTab === 'journal' && (
+          <div className="tab-pane tab-pane--journal">
+            <JournalPage />
+          </div>
+        )}
+
+        {activeTab === 'insights' && (
+          <div className="tab-pane tab-pane--insights">
+            <InsightsTab />
           </div>
         )}
 
