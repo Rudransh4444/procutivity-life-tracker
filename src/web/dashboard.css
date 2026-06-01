@@ -741,6 +741,7 @@
   z-index: 1;
   opacity: 1;
   transition: opacity 300ms ease;
+  pointer-events: none;
 }
 
 .app-shell__glow {
@@ -770,6 +771,11 @@
 .app-shell--cold .app-shell__overlay,
 .app-shell--cold .app-shell__glow {
   opacity: 0;
+}
+
+/* When the shell is ready, overlay remains decorative and should not block interactions */
+.app-shell--ready .app-shell__overlay {
+  pointer-events: none;
 }
 
 .shell-toolbar,
