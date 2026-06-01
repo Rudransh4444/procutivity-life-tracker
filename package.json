@@ -7,9 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node src/groq/adapter.test.js",
-    "vercel-build": "vite build",
-    "quartz:prepare": "node scripts/quartz_prepare.js",
-    "quartz:build": "npx quartz build --source quartz_vault --out public/quartz || echo \"Quartz CLI not installed; run 'npm i -g @quartz/cli' or use 'npx quartz'\""
+    "vercel-build": "vite build"
   },
   "author": "",
   "license": "MIT",

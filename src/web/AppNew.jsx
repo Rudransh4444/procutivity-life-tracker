@@ -135,11 +135,16 @@ export function App() {
   const [showChrome, setShowChrome] = useState(false);
   const [showWidgets, setShowWidgets] = useState(false);
 
+  // On first load, if no API key configured, show Settings so user can enter keys.
+  // Do not force the user to stay in Settings after the initial redirect.
   useEffect(() => {
-    if (!aiConfig.apiKey && activeTab !== 'settings') {
+    let redirected = false;
+    if (!aiConfig.apiKey && activeTab !== 'settings' && !redirected) {
       setActiveTab('settings');
+      redirected = true;
     }
-  }, [aiConfig.apiKey, activeTab, setActiveTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const syncTimeOfDay = () => setTimeOfDay(getTimeOfDay());
