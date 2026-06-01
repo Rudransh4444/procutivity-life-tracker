@@ -34,6 +34,7 @@ export function SettingsTab({ aiConfig, onSaveConfig }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link-primary"
+                style={{ color: 'var(--accent-cool)' }}
               >
                 console.groq.com/keys <FiExternalLink size={12} style={{ display: 'inline' }} />
               </a>

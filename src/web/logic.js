@@ -214,6 +214,61 @@ export function fallbackProjectExpansion(project, tasks) {
   };
 }
 
+export function createTaskBreakdownPrompt(task, importance, projectName = '') {
+  const title = normalizeGoalText(task?.title || 'Task');
+  const context = normalizeGoalText(task?.notes || '');
+  return [
+    'You are a calm productivity assistant.',
+    'Break the given task into 3 to 6 very small subtasks.',
+    'Return valid JSON only in this exact shape:',
+    '{ "task_id": string, "subtasks": [{ "title": string, "priority": number, "estimatedMinutes": number, "notes": string }] }',
+    'Rules:',
+    '- Each subtask must be atomic, actionable, and doable in under 30 minutes.',
+    '- Prefer a practical sequence from first step to finish.',
+    '- Keep wording concise and specific.',
+    '- Do not include any extra prose or markdown.',
+    '',
+    `Task: ${title}`,
+    `Importance: ${importance ?? task?.priority ?? 5}`,
+    `Project: ${projectName || task?.projectName || task?.project_id || 'none'}`,
+    context ? `Notes: ${context}` : 'Notes: none'
+  ].join('\n');
+}
+
+export function fallbackTaskBreakdown(task, importance) {
+  const title = normalizeGoalText(task?.title || 'Task');
+  const priority = Number(importance ?? task?.priority ?? 5) || 5;
+  const base = Math.max(15, Math.min(30, (priority * 3) + 6));
+
+  return [
+    { title: `Clarify ${title}`, priority: Math.max(1, priority - 1), estimatedMinutes: Math.max(10, base - 5), notes: 'Define the exact finish line.' },
+    { title: `Do the first small step for ${title}`, priority, estimatedMinutes: base, notes: 'Start with the simplest useful action.' },
+    { title: `Review and close out ${title}`, priority: Math.max(1, priority - 2), estimatedMinutes: Math.max(10, base - 3), notes: 'Check the output and make it done.' }
+  ];
+}
+
+export function normalizeTaskBreakdownPayload(payload, fallbackTask) {
+  const candidate = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.subtasks)
+      ? payload.subtasks
+      : [];
+
+  if (!candidate.length) {
+    return fallbackTaskBreakdown(fallbackTask, fallbackTask?.priority);
+  }
+
+  return candidate
+    .filter((item) => item && item.title)
+    .slice(0, 6)
+    .map((item, index) => ({
+      title: normalizeGoalText(item.title),
+      priority: Number(item.priority ?? fallbackTask?.priority ?? 5) || 5,
+      estimatedMinutes: Number(item.estimatedMinutes ?? item.est_minutes ?? 20) || 20,
+      notes: normalizeGoalText(item.notes || item.rationale || '') || `Step ${index + 1}`
+    }));
+}
+
 export function applyProjectExpansion(projectId, tasks, expansion) {
   const addOps = Array.isArray(expansion?.add) ? expansion.add : [];
   const updateOps = Array.isArray(expansion?.update) ? expansion.update : [];

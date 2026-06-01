@@ -292,6 +292,7 @@ export function App() {
               productivityMetrics={productivityMetrics}
               awData={awData}
               todayMood={todayMood}
+              aiConfig={aiConfig}
               sceneLabel={sceneLabel}
               onAddTask={() => {
                 const title = prompt('Task title:');

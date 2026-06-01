@@ -13,8 +13,8 @@
   --gradient-gold-blue: linear-gradient(135deg, rgba(255, 245, 220, 1) 0%, rgba(255, 201, 133, 1) 35%, rgba(157, 220, 255, 1) 100%);
 
   /* Neon accents */
-  --accent-teal: rgb(0, 240, 220); /* Primary focus color */
-  --accent-teal-dark: rgb(0, 180, 165);
+  --accent-teal: rgb(157, 220, 255); /* Legacy token mapped to cool blue */
+  --accent-teal-dark: rgb(92, 171, 235);
   --accent-amber: rgb(255, 200, 80); /* Warnings, gentle alerts */
   --accent-green: rgb(80, 220, 140); /* Success states */
   --accent-red: rgb(255, 100, 130); /* Distractions, urgent */
@@ -32,8 +32,8 @@
 
   /* Gradients */
   --gradient-dark: linear-gradient(135deg, rgb(10, 12, 25) 0%, rgb(20, 24, 45) 100%);
-  --gradient-accent: linear-gradient(135deg, rgb(0, 240, 220) 0%, rgb(0, 180, 165) 100%);
-  --gradient-warm: linear-gradient(135deg, rgb(255, 200, 80) 0%, rgb(255, 150, 100) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cool) 100%);
+  --gradient-warm: linear-gradient(135deg, rgba(255, 245, 220, 1) 0%, rgba(255, 201, 133, 1) 55%, rgba(157, 220, 255, 1) 100%);
 
   /* Spacing */
   --space-xs: 4px;
@@ -95,12 +95,12 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent-teal-dark);
+  background: linear-gradient(180deg, var(--accent-warm), var(--accent-cool));
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-teal);
+  background: var(--gradient-gold-blue);
 }
 
 /* Layout base */
@@ -221,7 +221,7 @@ p {
 button, .button {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  border: 1px solid var(--accent-teal);
+  border: 1px solid rgba(255, 201, 133, 0.45);
   border-radius: var(--radius-md);
   padding: var(--space-md) var(--space-lg);
   font-size: var(--font-size-md);
@@ -232,7 +232,7 @@ button, .button {
 }
 
 button:hover, .button:hover {
-  background: var(--accent-teal);
+  background: var(--gradient-gold-blue);
   color: var(--bg-primary);
   transform: scale(1.02);
 }
@@ -248,14 +248,15 @@ button:disabled, .button:disabled {
 }
 
 .button-primary {
-  background: var(--accent-teal);
+  background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cool) 100%);
   color: var(--bg-primary);
-  border-color: var(--accent-teal);
+  border-color: rgba(255, 201, 133, 0.75);
+  box-shadow: 0 10px 24px rgba(255, 201, 133, 0.16);
 }
 
 .button-primary:hover {
-  background: var(--accent-teal-dark);
-  border-color: var(--accent-teal-dark);
+  background: linear-gradient(135deg, rgba(255, 245, 220, 1) 0%, rgba(255, 201, 133, 1) 38%, rgba(157, 220, 255, 1) 100%);
+  border-color: rgba(157, 220, 255, 0.85);
 }
 
 .button-secondary {
@@ -266,8 +267,8 @@ button:disabled, .button:disabled {
 
 .button-secondary:hover {
   background: var(--bg-tertiary);
-  border-color: var(--accent-teal);
-  color: var(--accent-teal);
+  border-color: var(--accent-cool);
+  color: var(--accent-cool);
 }
 
 .button-danger {
@@ -308,8 +309,8 @@ input::placeholder, textarea::placeholder {
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--accent-teal);
-  box-shadow: 0 0 0 3px rgba(0, 240, 220, 0.1);
+  border-color: var(--accent-cool);
+  box-shadow: 0 0 0 3px rgba(157, 220, 255, 0.12);
   background: var(--bg-secondary);
 }
 
@@ -328,8 +329,8 @@ input:disabled, textarea:disabled, select:disabled {
   font-size: var(--font-size-sm);
   font-weight: 600;
   background: var(--bg-tertiary);
-  color: var(--accent-teal);
-  border: 1px solid var(--accent-teal);
+  color: var(--accent-cool);
+  border: 1px solid rgba(157, 220, 255, 0.4);
 }
 
 .badge-success {
@@ -365,7 +366,7 @@ input:disabled, textarea:disabled, select:disabled {
   background: var(--gradient-accent);
   border-radius: var(--radius-full);
   transition: width var(--transition-slow);
-  box-shadow: 0 0 12px rgba(0, 240, 220, 0.5);
+  box-shadow: 0 0 12px rgba(157, 220, 255, 0.35);
 }
 
 /* Modals & Overlays */
@@ -390,7 +391,7 @@ input:disabled, textarea:disabled, select:disabled {
   box-shadow: var(--shadow-lg);
   max-width: 500px;
   width: 90%;
-  border: 1px solid var(--accent-teal);
+  border: 1px solid rgba(157, 220, 255, 0.22);
   animation: slideUp var(--transition-normal);
 }
 

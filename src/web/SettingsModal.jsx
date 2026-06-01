@@ -37,7 +37,7 @@ export function SettingsModal({ isOpen, onClose, aiConfig, onSaveConfig }) {
           <h3>Groq API Key</h3>
           <p className="text-secondary text-sm">
             Get your free API key at{' '}
-            <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-teal)' }}>
+            <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-cool)' }}>
               console.groq.com/keys
             </a>
           </p>
